@@ -26,12 +26,10 @@
     "strictNullChecks": false,
 
     /* Path mapping */
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-          "@/*": ["./client/*"],
-          "@shared/*": ["./shared/*"]
-        }
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./client/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
   "include": [

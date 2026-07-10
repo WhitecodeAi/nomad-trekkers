@@ -64,14 +64,7 @@ export default function App() {
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/ride-booking"
-                      element={
-                        <ProtectedRoute>
-                          <RideBooking />
-                        </ProtectedRoute>
-                      }
-                    />
+
                     <Route
                       path="/contribute"
                       element={

@@ -44,6 +44,8 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "@/components/ui/use-toast";
 
 export default function FortDetail() {
   const { id } = useParams();
@@ -51,6 +53,10 @@ export default function FortDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const { user, isAuthenticated } = useAuth();
+  const [trekGroups, setTrekGroups] = useState<any[]>([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
 
   useEffect(() => {
     const fetchFort = async () => {
@@ -62,11 +68,17 @@ export default function FortDetail() {
 
       try {
         setLoading(true);
-        const response = await apiService.getFortById(parseInt(id));
-        setFort(response.data);
+        const [fortResponse, groupsResponse] = await Promise.all([
+          apiService.getFortById(parseInt(id)),
+          fetch("/api/trek-groups").then(res => res.ok ? res.json() : { success: false, groups: [] })
+        ]);
+        setFort(fortResponse.data);
+        if (groupsResponse.success) {
+          setTrekGroups(groupsResponse.groups || groupsResponse.data || []);
+        }
       } catch (err) {
-        console.error("Error fetching fort:", err);
-        setError("Failed to load fort details. Please try again later.");
+        console.error("Error fetching fort data:", err);
+        setError("Failed to load details. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -88,6 +100,66 @@ export default function FortDetail() {
       setError("Failed to refresh data. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const joinTrekGroup = async (groupId: number) => {
+    if (!isAuthenticated || !user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to join this trek group.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoadingGroups(true);
+      const response = await fetch(`/api/trek-groups/${groupId}/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          toast({
+            title: "Joined Group!",
+            description: "You have successfully joined the trek group.",
+          });
+          
+          // Refresh trek groups
+          const groupsResponse = await fetch("/api/trek-groups").then(res => res.ok ? res.json() : { success: false, groups: [] });
+          if (groupsResponse.success) {
+            setTrekGroups(groupsResponse.groups || groupsResponse.data || []);
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: data.message || "Failed to join group.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        const errData = await response.json();
+        toast({
+          title: "Error",
+          description: errData.message || "Failed to join group.",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      console.error("Error joining group:", err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingGroups(false);
     }
   };
 
@@ -199,12 +271,13 @@ export default function FortDetail() {
             {/* Main Content */}
             <div className="lg:col-span-2">
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="trek">Trek Info</TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                   <TabsTrigger value="gallery">Gallery</TabsTrigger>
                   <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  <TabsTrigger value="groups">Trek Groups</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
@@ -483,6 +556,127 @@ export default function FortDetail() {
                 <TabsContent value="reviews" className="space-y-6">
                   <ReviewsSection fortName={fort.name} />
                 </TabsContent>
+
+                <TabsContent value="groups" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Active Trek Groups for {fort.name}</CardTitle>
+                      <CardDescription>
+                        Join an existing trekking group or community plan for this fort.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {(() => {
+                        const matchingGroups = trekGroups.filter((g) =>
+                          g.fortName.toLowerCase().includes(fort.name.toLowerCase())
+                        );
+
+                        if (matchingGroups.length === 0) {
+                          return (
+                            <div className="text-center py-12 text-muted-foreground">
+                              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                              <h3 className="text-lg font-semibold mb-2">No Groups Found</h3>
+                              <p className="max-w-md mx-auto text-sm mb-6">
+                                There are currently no active trek groups scheduled for {fort.name}.
+                              </p>
+                              <Link to="/trek-planner">
+                                <Button className="bg-primary hover:bg-primary/95">
+                                  Create a Trek Plan
+                                </Button>
+                              </Link>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {matchingGroups.map((group) => {
+                              const isFull = group.currentParticipants >= group.maxParticipants;
+                              const isClosed = group.status === "closed" || group.status === "cancelled";
+                              
+                              return (
+                                <div
+                                  key={group.id}
+                                  className="p-5 border rounded-lg hover:border-primary/50 hover:shadow-sm transition-all flex flex-col justify-between bg-card"
+                                >
+                                  <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h4 className="font-semibold text-base line-clamp-1">{group.title}</h4>
+                                      <Badge
+                                        variant={isClosed ? "secondary" : isFull ? "destructive" : "default"}
+                                        className="text-xs shrink-0 ml-2"
+                                      >
+                                        {isClosed ? "Closed" : isFull ? "Full" : "Open"}
+                                      </Badge>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                                      {group.description}
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs text-muted-foreground mb-4 border-t pt-3">
+                                      <div className="flex items-center gap-1.5">
+                                        <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
+                                        <span className="truncate">{new Date(group.trekDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Users className="h-3.5 w-3.5 text-primary shrink-0" />
+                                        <span>{group.currentParticipants} / {group.maxParticipants} joined</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                                        <span>{group.duration || "1 Day"}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500 shrink-0" />
+                                        <span className="truncate">{group.organizerName || group.organizer?.name || "Organizer"}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5 col-span-2">
+                                        <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                                        <span className="truncate">Meeting: {group.meetingPoint || "Base Village"}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Badge variant="outline" className="text-[10px] py-0 px-1.5">
+                                          {group.difficulty}
+                                        </Badge>
+                                        <span className="font-semibold text-primary">
+                                          {group.cost === 0 ? "Free" : `₹${group.cost}`}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 border-t pt-3 mt-auto">
+                                    <Link to={`/trek-groups?groupId=${group.id}&backToFortId=${fort.id}&backToFortName=${encodeURIComponent(fort.name)}`} className="flex-1">
+                                      <Button variant="outline" className="w-full text-xs h-9">
+                                        View Details
+                                      </Button>
+                                    </Link>
+                                    {!isAuthenticated ? (
+                                      <Link to="/login" className="flex-1">
+                                        <Button className="w-full text-xs h-9 bg-primary hover:bg-primary/95">
+                                          Log in to Join
+                                        </Button>
+                                      </Link>
+                                    ) : (
+                                      <Button
+                                        onClick={() => joinTrekGroup(group.id)}
+                                        disabled={isFull || isClosed || loadingGroups}
+                                        className="flex-1 text-xs h-9 bg-primary hover:bg-primary/95"
+                                      >
+                                        {loadingGroups ? (
+                                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                        ) : null}
+                                        Join Group
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
               </Tabs>
             </div>
 
@@ -581,7 +775,7 @@ export default function FortDetail() {
                     Get Directions
                   </Button>
 
-                  <Link to="/trek-groups">
+                  <Link to={`/trek-groups?fortName=${encodeURIComponent(fort.name)}&backToFortId=${fort.id}&backToFortName=${encodeURIComponent(fort.name)}`}>
                     <Button variant="outline" className="w-full">
                       <Users className="h-4 w-4 mr-2" />
                       Find Trek Groups

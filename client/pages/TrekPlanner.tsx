@@ -69,6 +69,7 @@ import {
   Sun,
   Thermometer,
   Star,
+  Search,
   Save,
   Share2,
   Download,
@@ -109,6 +110,7 @@ interface WeatherForecast {
 
 export default function TrekPlanner() {
   const [forts, setForts] = useState<Fort[]>([]);
+  const [fortSearchQuery, setFortSearchQuery] = useState("");
   const [savedPlans, setSavedPlans] = useState<TrekPlanSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -807,6 +809,15 @@ export default function TrekPlanner() {
     }
   };
 
+  const filteredForts = forts.filter((fort) => {
+    const query = fortSearchQuery.toLowerCase();
+    return (
+      fort.name.toLowerCase().includes(query) ||
+      fort.location.toLowerCase().includes(query) ||
+      fort.difficulty.toLowerCase().includes(query)
+    );
+  });
+
   if (loading && forts.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -851,7 +862,6 @@ export default function TrekPlanner() {
               <TabsTrigger value="planner">Plan Trek</TabsTrigger>
               <TabsTrigger value="gear">Gear Checklist</TabsTrigger>
               <TabsTrigger value="weather">Weather</TabsTrigger>
-              <TabsTrigger value="rides">Book Rides</TabsTrigger>
               <TabsTrigger value="saved">
                 Saved Plans ({savedPlans.length})
               </TabsTrigger>
@@ -911,55 +921,70 @@ export default function TrekPlanner() {
                         Choose one or more forts for your trekking adventure
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search forts by name, location, or difficulty..."
+                          value={fortSearchQuery}
+                          onChange={(e) => setFortSearchQuery(e.target.value)}
+                          className="pl-9"
+                        />
+                      </div>
                       {error ? (
                         <div className="text-center text-muted-foreground">
                           <p>{error}</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-                          {forts.map((fort) => (
-                            <div
-                              key={fort.id}
-                              className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                                plannerState.selectedForts.includes(fort.id)
-                                  ? "border-primary bg-primary/5"
-                                  : "border-border hover:border-primary/50"
-                              }`}
-                              onClick={() => toggleFortSelection(fort.id)}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-semibold">{fort.name}</h4>
-                                {plannerState.selectedForts.includes(
-                                  fort.id,
-                                ) && (
-                                  <CheckCircle className="h-5 w-5 text-primary" />
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge
-                                  className={fortHelpers.getDifficultyColor(
-                                    fort.difficulty,
+                          {filteredForts.length === 0 ? (
+                            <div className="col-span-full py-8 text-center text-muted-foreground">
+                              No forts match your search.
+                            </div>
+                          ) : (
+                            filteredForts.map((fort) => (
+                              <div
+                                key={fort.id}
+                                className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                                  plannerState.selectedForts.includes(fort.id)
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border hover:border-primary/50"
+                                }`}
+                                onClick={() => toggleFortSelection(fort.id)}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-semibold">{fort.name}</h4>
+                                  {plannerState.selectedForts.includes(
+                                    fort.id,
+                                  ) && (
+                                    <CheckCircle className="h-5 w-5 text-primary" />
                                   )}
-                                  variant="secondary"
-                                >
-                                  {fort.difficulty}
-                                </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge
+                                    className={fortHelpers.getDifficultyColor(
+                                      fort.difficulty,
+                                    )}
+                                    variant="secondary"
+                                  >
+                                    {fort.difficulty}
+                                  </Badge>
+                                  <div className="flex items-center text-sm text-muted-foreground">
+                                    <Star className="h-3 w-3 mr-1 text-yellow-500" />
+                                    {fortHelpers.formatRating(fort.rating)}
+                                  </div>
+                                </div>
+                                <div className="flex items-center text-sm text-muted-foreground mb-1">
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  {fort.duration}
+                                </div>
                                 <div className="flex items-center text-sm text-muted-foreground">
-                                  <Star className="h-3 w-3 mr-1 text-yellow-500" />
-                                  {fortHelpers.formatRating(fort.rating)}
+                                  <MapPin className="h-4 w-4 mr-1" />
+                                  {fort.location}
                                 </div>
                               </div>
-                              <div className="flex items-center text-sm text-muted-foreground mb-1">
-                                <Clock className="h-4 w-4 mr-1" />
-                                {fort.duration}
-                              </div>
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <MapPin className="h-4 w-4 mr-1" />
-                                {fort.location}
-                              </div>
-                            </div>
-                          ))}
+                            ))
+                          )}
                         </div>
                       )}
                     </CardContent>
@@ -1492,7 +1517,17 @@ export default function TrekPlanner() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {plannerState.selectedForts.length === 0 ? (
+                  {true ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-lg font-semibold mb-2">
+                        Functionality Disabled
+                      </h3>
+                      <p className="max-w-md mx-auto">
+                        Ride booking functionality is currently disabled. Please arrange your own transportation or check back later.
+                      </p>
+                    </div>
+                  ) : plannerState.selectedForts.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Car className="h-12 w-12 mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">

@@ -37,6 +37,7 @@ import {
   Copy,
   Check,
   Loader2,
+  ChevronLeft,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -82,12 +83,17 @@ interface GroupMember {
 }
 
 export default function TrekGroups() {
+  const queryParams = new URLSearchParams(window.location.search);
+  const backToFortId = queryParams.get("backToFortId");
+  const backToFortName = queryParams.get("backToFortName");
+
   const [groups, setGroups] = useState<TrekGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDifficulty, setFilterDifficulty] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [expandedGroupId, setExpandedGroupId] = useState<number | null>(null);
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [selectedChatGroup, setSelectedChatGroup] = useState<number | null>(null);
   const [openChatDialog, setOpenChatDialog] = useState(false);
@@ -115,9 +121,41 @@ export default function TrekGroups() {
  
 
   useEffect(() => {
-     
     fetchTrekGroups();
   }, []);
+
+  useEffect(() => {
+    const applyUrlParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      const targetGroupId = params.get("groupId");
+      if (targetGroupId) {
+        if (groups.length === 0) return;
+        const gid = parseInt(targetGroupId);
+        if (!isNaN(gid)) {
+          const matchedGroup = groups.find((g) => g.id === gid);
+          if (matchedGroup) {
+            setSearchTerm(matchedGroup.title);
+            setExpandedGroupId(gid);
+            
+            // Scroll to the card after rendering
+            setTimeout(() => {
+              const el = document.getElementById(`group-card-${gid}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+            }, 200);
+          }
+        }
+      } else {
+        const fortNameParam = params.get("fortName");
+        if (fortNameParam) {
+          setSearchTerm(fortNameParam);
+        }
+      }
+    };
+
+    applyUrlParams();
+  }, [groups]);
 
   const fetchTrekGroups = async () => {
     try {
@@ -447,6 +485,19 @@ export default function TrekGroups() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
+        {backToFortId && (
+          <div className="bg-white border-b py-3 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto flex items-center">
+              <Link
+                to={`/fort/${backToFortId}`}
+                className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back to {backToFortName ? decodeURIComponent(backToFortName) : "Fort"} Details
+              </Link>
+            </div>
+          </div>
+        )}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse space-y-6">
             {[1, 2, 3].map((i) => (
@@ -461,6 +512,19 @@ export default function TrekGroups() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
+      {backToFortId && (
+        <div className="bg-white border-b py-3 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto flex items-center">
+            <Link
+              to={`/fort/${backToFortId}`}
+              className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back to {backToFortName ? decodeURIComponent(backToFortName) : "Fort"} Details
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
@@ -755,6 +819,7 @@ export default function TrekGroups() {
           {filteredGroups.map((group) => (
             <Card
               key={group.id}
+              id={`group-card-${group.id}`}
               className="overflow-hidden hover:shadow-lg transition-shadow"
             >
               <CardHeader>
@@ -893,7 +958,7 @@ export default function TrekGroups() {
 
                 {/* Expandable Details */}
                 <div className="mt-4 pt-4 border-t">
-                  <details className="group">
+                  <details className="group" open={expandedGroupId === group.id || undefined}>
                     <summary className="cursor-pointer text-sm font-medium text-orange-600 hover:text-orange-700">
                       View Details & Requirements
                     </summary>
