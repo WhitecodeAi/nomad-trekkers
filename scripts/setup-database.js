@@ -1,9 +1,16 @@
 #!/usr/bin/env node
+import mysql from "mysql2/promise";
+import fs from "fs";
+import path from "path";
+import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
 
-const mysql = require("mysql2/promise");
-const fs = require("fs");
-const path = require("path");
-const bcrypt = require("bcrypt");
+// Load environment variables
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Database configuration
 const dbConfig = {
@@ -25,13 +32,13 @@ async function setupDatabase() {
     const dbName = process.env.DB_NAME || "forttracker";
     // Create database if it doesn't exist
     console.log(`📋 Creating database ${dbName} if not exists...`);
-    await connection.execute(
+    await connection.query(
       `CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
     );
     console.log(`✅ Database ${dbName} ensured`);
 
     // Use the database
-    await connection.execute(`USE \`${dbName}\``);
+    await connection.query(`USE \`${dbName}\``);
 
     // Read and execute migration files
     console.log("🔧 Running migrations...");
@@ -42,7 +49,7 @@ async function setupDatabase() {
       "../database/migrations/001_create_tables.sql",
     );
     const migration1SQL = fs.readFileSync(migration1Path, "utf8");
-    await connection.execute(migration1SQL);
+    await connection.query(migration1SQL);
     console.log("✅ Basic tables migration completed");
 
     // Run second migration
@@ -51,7 +58,7 @@ async function setupDatabase() {
       "../database/migrations/002_add_dynamic_content.sql",
     );
     const migration2SQL = fs.readFileSync(migration2Path, "utf8");
-    await connection.execute(migration2SQL);
+    await connection.query(migration2SQL);
     console.log("✅ Dynamic content migration completed");
 
     // Create admin user with hashed password
@@ -173,7 +180,7 @@ async function setupDatabase() {
       "../database/seeders/004_seed_trek_groups.sql",
     );
     const trekGroupsSQL = fs.readFileSync(trekGroupsPath, "utf8");
-    await connection.execute(trekGroupsSQL);
+    await connection.query(trekGroupsSQL);
 
     console.log("✅ Sample content created");
 

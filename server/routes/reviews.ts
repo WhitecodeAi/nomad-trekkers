@@ -68,7 +68,7 @@ router.post("/submit", upload.array("photos", 5), async (req, res) => {
     });
 
     const reviewId = await FortReviewModel.create({
-      user_id: req.user?.id || null, // Allow null for non-authenticated users
+      user_id: (req as any).user?.id || null, // Allow null for non-authenticated users
       fort_name: validatedData.fort_name,
       rating: validatedData.rating,
       review_text: validatedData.review_text,
@@ -158,7 +158,7 @@ router.get("/my-reviews", requireAuth, async (req, res) => {
   try {
     const { limit = 10, offset = 0 } = req.query;
 
-    const reviews = await FortReviewModel.getUserReviews(req.user.id, {
+    const reviews = await FortReviewModel.getUserReviews((req as any).user.id, {
       limit: parseInt(limit as string),
       offset: parseInt(offset as string),
     });

@@ -79,7 +79,7 @@ router.post(
       if (files && files.length > 0) {
         for (const file of files) {
           sqliteHelpers.createFileUpload(
-            result.lastInsertRowid,
+            Number(result.lastInsertRowid),
             file.originalname,
             file.filename,
             file.path,
@@ -220,8 +220,8 @@ router.get("/admin/content-submissions", async (req, res) => {
     const { type = "all", status = "all", limit = 50, offset = 0 } = req.query;
 
     const submissions = sqliteHelpers.getAllSubmissions(
-      type,
-      status,
+      type as string,
+      status as string,
       parseInt(limit as string),
       parseInt(offset as string),
     );

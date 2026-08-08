@@ -192,7 +192,7 @@ export const getFortById: RequestHandler = async (req, res) => {
       timings: '6:00 AM - 6:00 PM',
       entryFee: approvedFort.entry_fee || 'Contact local authorities',
       photography: true,
-      createdAt: new Date(approvedFort.submitted_at || Date.now()),
+      createdAt: new Date(approvedFort.created_at || Date.now()),
       updatedAt: new Date(approvedFort.updated_at || Date.now())
     };
 

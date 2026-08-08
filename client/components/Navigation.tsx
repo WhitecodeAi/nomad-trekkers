@@ -34,7 +34,6 @@ export default function Navigation() {
     { href: "/forts", label: "Explore Forts" },
     { href: "/trek-groups", label: "Find Groups" },
     { href: "/trek-planner", label: "Trek Planner", requireAuth: true },
-    { href: "/ride-booking", label: "Book Rides", requireAuth: true },
     { href: "/about", label: "About" },
   ];
 

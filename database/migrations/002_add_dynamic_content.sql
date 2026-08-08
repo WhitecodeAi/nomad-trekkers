@@ -1,5 +1,5 @@
 -- Add tables for dynamic content management
-USE forttreaker;
+USE forttracker;
 
 -- Create site_content table for footer, pages, and other dynamic content
 CREATE TABLE IF NOT EXISTS site_content (

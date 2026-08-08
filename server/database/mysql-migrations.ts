@@ -275,13 +275,6 @@ export async function runMigrations(): Promise<void> {
     await executeQuery(`
       CREATE TABLE IF NOT EXISTS site_content (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        type VARCHAR(50) NOT NULL,
-        slug VARCHAR(255) NULL DEFAULT NULL,
-        content LONGTEXT NOT NULL,
-    // Create site_content table for footer, pages, and other dynamic content
-    await executeQuery(`
-      CREATE TABLE IF NOT EXISTS site_content (
-        id INT AUTO_INCREMENT PRIMARY KEY,
         type ENUM('footer', 'page', 'announcement', 'feature') NOT NULL,
         slug VARCHAR(255) NULL,
         content JSON NOT NULL,
@@ -296,7 +289,6 @@ export async function runMigrations(): Promise<void> {
     `);
 
     // Insert default footer content if not exists
-    // Seed default footer content if not exists
     try {
       const footerExists = await executeQuery(`SELECT id FROM site_content WHERE type = 'footer'`);
       if (footerExists.length === 0) {
@@ -304,15 +296,6 @@ export async function runMigrations(): Promise<void> {
           INSERT INTO site_content (type, content) VALUES
           ('footer', ?)
         `, [JSON.stringify({
-          aboutText: 'Fort Tracker helps you discover and explore the magnificent forts of Maharashtra. Plan your treks, read reviews, and connect with fellow trekkers for unforgettable adventures.',
-          contactEmail: 'contact@forttracker.com',
-          contactPhone: '+91 9876543210',
-          address: 'Pune, Maharashtra, India',
-          socialLinks: {
-            facebook: 'https://facebook.com/forttracker',
-            twitter: 'https://twitter.com/forttracker',
-            instagram: 'https://instagram.com/forttracker',
-            youtube: 'https://youtube.com/forttracker'
           aboutText: 'NomadTrekkers helps you discover and explore the magnificent forts of Maharashtra. Plan your treks, read reviews, and connect with fellow trekkers for unforgettable adventures.',
           contactEmail: 'contact@nomadtrekkers.org',
           contactPhone: '+91 9876543210',
@@ -331,15 +314,11 @@ export async function runMigrations(): Promise<void> {
             { name: 'Guides', url: '/guides' },
             { name: 'Contact', url: '/contact' }
           ]
-        })]);
+        })])
         console.log("✅ Default footer content created");
       }
-    } catch (error) {
-      console.log("ℹ️ Footer content creation skipped:", error);
-        console.log("✅ Default footer content created in database");
-      }
-    } catch (err) {
-      console.log("ℹ️ Default footer content creation skipped/failed:", err.message);
+    } catch (error: any) {
+      console.log("ℹ️ Default footer content creation skipped/failed:", error.message);
     }
 
     // Insert default admin user if not exists
@@ -375,7 +354,6 @@ export async function checkMigrationStatus(): Promise<boolean> {
       FROM INFORMATION_SCHEMA.TABLES 
       WHERE TABLE_SCHEMA = DATABASE() 
       AND TABLE_NAME IN (?, ?, ?, ?)
-      AND TABLE_NAME IN (? , ? , ? , ?)
     `, requiredTables);
 
     const existingTableNames = tables.map((row: any) => row.TABLE_NAME);

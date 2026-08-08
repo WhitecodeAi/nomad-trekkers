@@ -86,7 +86,7 @@ export class FortReviewModel {
     // Parse photos JSON for each review
     return reviews.map(review => ({
       ...review,
-      photos: review.photos ? JSON.parse(review.photos as string) : []
+      photos: review.photos ? JSON.parse(review.photos as any) : []
     }));
   }
 
@@ -117,7 +117,7 @@ export class FortReviewModel {
     
     return reviews.map(review => ({
       ...review,
-      photos: review.photos ? JSON.parse(review.photos as string) : []
+      photos: review.photos ? JSON.parse(review.photos as any) : []
     }));
   }
 
@@ -133,7 +133,7 @@ export class FortReviewModel {
     );
 
     if (review) {
-      review.photos = review.photos ? JSON.parse(review.photos as string) : [];
+      review.photos = review.photos ? JSON.parse(review.photos as any) : [];
     }
 
     return review;
@@ -179,7 +179,7 @@ export class FortReviewModel {
     
     return reviews.map(review => ({
       ...review,
-      photos: review.photos ? JSON.parse(review.photos as string) : []
+      photos: review.photos ? JSON.parse(review.photos as any) : []
     }));
   }
 

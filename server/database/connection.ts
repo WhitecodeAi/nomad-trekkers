@@ -60,7 +60,7 @@ export async function initializeDatabase(): Promise<void> {
     const connection = await tempPool.getConnection();
 
     // Create database if it doesn't exist
-    await connection.execute(
+    await connection.query(
       `CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
     );
     console.log(`✅ Database '${dbConfig.database}' ensured to exist`);

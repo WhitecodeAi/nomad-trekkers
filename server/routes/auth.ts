@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { AuthService, UserModel, SessionModel } from "../database/auth-models.js";
+import { AuthService, UserModel, SessionModel, RegisterData, LoginData } from "../database/auth-models.js";
 
 const router = Router();
 
@@ -99,7 +99,7 @@ export const requireAdmin = async (req: any, res: any, next: any) => {
 // Register endpoint
 router.post("/register", async (req, res) => {
   try {
-    const validatedData = registerSchema.parse(req.body);
+    const validatedData = registerSchema.parse(req.body) as RegisterData;
     
     const authResponse = await AuthService.register(validatedData);
     
@@ -140,7 +140,7 @@ router.post("/register", async (req, res) => {
 // Login endpoint
 router.post("/login", async (req, res) => {
   try {
-    const validatedData = loginSchema.parse(req.body);
+    const validatedData = loginSchema.parse(req.body) as LoginData;
     
     const authResponse = await AuthService.login(validatedData);
     
@@ -255,7 +255,7 @@ router.post("/change-password", requireAuth, async (req, res) => {
       });
     }
 
-    const user = await UserModel.findById(req.user.id);
+    const user = await UserModel.findById((req as any).user.id);
     if (!user) {
       return res.status(404).json({
         success: false,

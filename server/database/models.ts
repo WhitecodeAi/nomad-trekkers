@@ -355,17 +355,17 @@ export class FortInfoModel {
       params.push(filters.limit);
     }
 
-    const results = await executeQuery<any[]>(query, params);
+    const results = await executeQuery<any>(query, params);
 
     // Parse JSON fields
     return results.map((row) => ({
       ...row,
-      images: row.images ? JSON.parse(row.images) : [],
-    }));
+      images: row.images ? (typeof row.images === "string" ? JSON.parse(row.images) : row.images) : [],
+    })) as FortInfo[];
   }
 
   static async getById(id: number): Promise<FortInfo | null> {
-    const results = await executeQuery<FortInfo[]>(
+    const results = await executeQuery<any>(
       "SELECT * FROM fort_info WHERE id = ?",
       [id],
     );
@@ -375,8 +375,8 @@ export class FortInfoModel {
     const row = results[0];
     return {
       ...row,
-      images: row.images ? JSON.parse(row.images as string) : [],
-    };
+      images: row.images ? (typeof row.images === "string" ? JSON.parse(row.images) : row.images) : [],
+    } as FortInfo;
   }
 
   static async create(submissionId: number, data: any): Promise<number> {

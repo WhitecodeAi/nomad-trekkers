@@ -140,7 +140,7 @@ export class TrekPlanService {
   }
 
   static async findById(id: string): Promise<TrekPlan | null> {
-    const result = await executeQuery<TrekPlanDB[]>(
+    const result = await executeQuery<TrekPlanDB>(
       'SELECT * FROM trek_plans WHERE id = ?',
       [id]
     );
@@ -185,7 +185,7 @@ export class TrekPlanService {
       }
     }
 
-    const result = await executeQuery<TrekPlanDB[]>(query, params);
+    const result = await executeQuery<TrekPlanDB>(query, params);
     return result.map(this.dbToModel);
   }
 
@@ -277,7 +277,7 @@ export class TrekPlanService {
       params.push(userId);
     }
 
-    const result = await executeQuery<{count: number}[]>(query, params);
+    const result = await executeQuery<{count: number}>(query, params);
     return result[0].count;
   }
 

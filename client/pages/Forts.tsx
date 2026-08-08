@@ -37,7 +37,7 @@ export default function Forts() {
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [ratingFilter, setRatingFilter] = useState([0]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState<"name" | "elevation" | "rating" | "difficulty" | "reviews">("name");
 
   const difficulties = ["Easy", "Moderate", "Difficult", "Expert"];
 
@@ -321,7 +321,7 @@ export default function Forts() {
               </Select>
 
               {/* Sort */}
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={(val) => setSortBy(val as any)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>

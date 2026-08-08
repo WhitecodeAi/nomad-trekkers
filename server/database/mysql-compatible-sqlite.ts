@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import type { Database as DatabaseType } from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
@@ -6,10 +7,10 @@ import fs from "fs";
 const dbPath = path.join(process.cwd(), "data", "forttracker.db");
 
 // Lazy database connection
-let db: Database | null = null;
+let db: DatabaseType | null = null;
 let initialized = false;
 
-function getDB(): Database {
+function getDB(): DatabaseType {
   if (!db) {
     // Ensure data directory exists
     const dataDir = path.dirname(dbPath);
