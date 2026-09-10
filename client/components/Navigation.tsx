@@ -64,10 +64,10 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <Mountain className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl text-foreground">
-              FortTrekker
+          <Link to="/" className="flex items-center space-x-3">
+            <img src="/logo.png" alt="Nomad Trekkers Logo" className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-500/20 shadow-sm" />
+            <span className="font-bold text-xl text-foreground tracking-tight">
+              Nomad Trekkers
             </span>
           </Link>
 

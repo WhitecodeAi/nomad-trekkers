@@ -271,31 +271,10 @@ export async function runMigrations(): Promise<void> {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 
-    // Create site_content table
-    await executeQuery(`
-      CREATE TABLE IF NOT EXISTS site_content (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        type VARCHAR(50) NOT NULL,
-        slug VARCHAR(255) NULL DEFAULT NULL,
-        content LONGTEXT NOT NULL,
-    // Create site_content table for footer, pages, and other dynamic content
-    await executeQuery(`
-      CREATE TABLE IF NOT EXISTS site_content (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        type ENUM('footer', 'page', 'announcement', 'feature') NOT NULL,
-        slug VARCHAR(255) NULL,
-        content JSON NOT NULL,
-        is_published BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_type (type),
-        INDEX idx_slug (slug),
-        INDEX idx_is_published (is_published),
-        UNIQUE KEY unique_type_slug (type, slug)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
 
-    // Insert default footer content if not exists
+    // Create site_content table for footer, pages, and other dynamic content
+    await executeQuery();
+
     // Seed default footer content if not exists
     try {
       const footerExists = await executeQuery(`SELECT id FROM site_content WHERE type = 'footer'`);
@@ -304,15 +283,6 @@ export async function runMigrations(): Promise<void> {
           INSERT INTO site_content (type, content) VALUES
           ('footer', ?)
         `, [JSON.stringify({
-          aboutText: 'Fort Tracker helps you discover and explore the magnificent forts of Maharashtra. Plan your treks, read reviews, and connect with fellow trekkers for unforgettable adventures.',
-          contactEmail: 'contact@forttracker.com',
-          contactPhone: '+91 9876543210',
-          address: 'Pune, Maharashtra, India',
-          socialLinks: {
-            facebook: 'https://facebook.com/forttracker',
-            twitter: 'https://twitter.com/forttracker',
-            instagram: 'https://instagram.com/forttracker',
-            youtube: 'https://youtube.com/forttracker'
           aboutText: 'NomadTrekkers helps you discover and explore the magnificent forts of Maharashtra. Plan your treks, read reviews, and connect with fellow trekkers for unforgettable adventures.',
           contactEmail: 'contact@nomadtrekkers.org',
           contactPhone: '+91 9876543210',
@@ -332,14 +302,10 @@ export async function runMigrations(): Promise<void> {
             { name: 'Contact', url: '/contact' }
           ]
         })]);
-        console.log("✅ Default footer content created");
+        console.log('✅ Default footer content created in database');
       }
-    } catch (error) {
-      console.log("ℹ️ Footer content creation skipped:", error);
-        console.log("✅ Default footer content created in database");
-      }
-    } catch (err) {
-      console.log("ℹ️ Default footer content creation skipped/failed:", err.message);
+    } catch (err: any) {
+      console.log('ℹ️ Default footer content creation skipped/failed:', err.message);
     }
 
     // Insert default admin user if not exists
@@ -353,15 +319,15 @@ export async function runMigrations(): Promise<void> {
           VALUES (?, ?, ?, ?, ?, ?)
         `, ['admin@nomadtrekkers.org', hashedPassword, 'System Administrator', 'admin', true, true]);
 
-        console.log("✅ Default admin user created (admin@nomadtrekkers.org / admin123)");
+        console.log('✅ Default admin user created (admin@nomadtrekkers.org / admin123)');
       }
     } catch (error) {
-      console.log("ℹ️ Admin user creation skipped (table may already be populated)");
+      console.log('ℹ️ Admin user creation skipped (table may already be populated)');
     }
 
-    console.log("✅ MySQL database migrations completed successfully");
+    console.log('✅ MySQL database migrations completed successfully');
   } catch (error) {
-    console.error("❌ Migration failed:", error);
+    console.error('❌ Migration failed:', error);
     throw error;
   }
 }
@@ -375,9 +341,7 @@ export async function checkMigrationStatus(): Promise<boolean> {
       FROM INFORMATION_SCHEMA.TABLES 
       WHERE TABLE_SCHEMA = DATABASE() 
       AND TABLE_NAME IN (?, ?, ?, ?)
-      AND TABLE_NAME IN (? , ? , ? , ?)
     `, requiredTables);
-
     const existingTableNames = tables.map((row: any) => row.TABLE_NAME);
     const missingTables = requiredTables.filter((table) => !existingTableNames.includes(table));
 

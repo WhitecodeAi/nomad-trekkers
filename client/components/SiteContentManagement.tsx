@@ -231,7 +231,7 @@ export default function SiteContentManagement() {
                           aboutText: e.target.value,
                         }))
                       }
-                      placeholder="About Fort Tracker..."
+                      placeholder="About Nomad Trekkers..."
                       rows={4}
                     />
                   </div>

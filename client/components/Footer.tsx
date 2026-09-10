@@ -96,9 +96,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand & About */}
           <div className="lg:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <Mountain className="h-8 w-8 text-orange-500" />
-              <span className="text-2xl font-bold">Fort Trekker</span>
+            <div className="flex items-center space-x-3 mb-4">
+              <img src="/logo.png" alt="Nomad Trekkers Logo" className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-500/30" />
+              <span className="text-2xl font-bold">Nomad Trekkers</span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-md">
               {footerContent.aboutText}
@@ -236,7 +236,7 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} Fort Tracker. All rights reserved.
+              © {new Date().getFullYear()} Nomad Trekkers. All rights reserved.
             </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link
