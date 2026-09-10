@@ -96,9 +96,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand & About */}
           <div className="lg:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <img src="/logo.png" alt="Nomad Trekkers Logo" className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-500/30" />
-              <span className="text-2xl font-bold">Nomad Trekkers</span>
+            <div className="mb-4">
+              <span className="text-2xl font-extrabold tracking-widest uppercase bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+                NOMAD TREKKERS
+              </span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-md">
               {footerContent.aboutText}

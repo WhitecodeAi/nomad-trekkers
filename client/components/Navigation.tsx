@@ -63,11 +63,10 @@ export default function Navigation() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <img src="/logo.png" alt="Nomad Trekkers Logo" className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-500/20 shadow-sm" />
-            <span className="font-bold text-xl text-foreground tracking-tight">
-              Nomad Trekkers
+          {/* Brand Name */}
+          <Link to="/" className="flex items-center">
+            <span className="font-extrabold text-xl sm:text-2xl tracking-widest uppercase bg-gradient-to-r from-orange-600 via-amber-500 to-orange-500 bg-clip-text text-transparent">
+              NOMAD TREKKERS
             </span>
           </Link>
 
