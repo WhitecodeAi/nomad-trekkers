@@ -66,7 +66,7 @@ export default function Footer() {
       aboutText:
         "NomadTrekkers helps you discover and explore the magnificent forts of Maharashtra. Plan your treks, read reviews, and connect with fellow trekkers for unforgettable adventures.",
       contactEmail: "contact@nomadtrekkers.org",
-      contactPhone: "+91 9876543210",
+      contactPhone: "",
       address: "Pune, Maharashtra, India",
       socialLinks: {
         facebook: "https://www.facebook.com/NomadTrekkers/",
@@ -114,15 +114,6 @@ export default function Footer() {
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   {footerContent.contactEmail}
-                </a>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-orange-500" />
-                <a
-                  href={`tel:${footerContent.contactPhone}`}
-                  className="text-gray-300 hover:text-white transition-colors text-sm"
-                >
-                  {footerContent.contactPhone}
                 </a>
               </div>
               <div className="flex items-center space-x-3">

@@ -263,7 +263,7 @@ export default function SiteContentManagement() {
                           contactPhone: e.target.value,
                         }))
                       }
-                      placeholder="+91 9876543210"
+                      placeholder=""
                     />
                   </div>
 
